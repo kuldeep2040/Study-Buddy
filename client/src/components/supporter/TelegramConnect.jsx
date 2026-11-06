@@ -1,10 +1,12 @@
 // A supporter's Telegram connection for ONE link.
-// Two taps: "Connect Telegram" (we create a one-time t.me link) → "Open Telegram" (a real link,
-// so phones open the Telegram app; browsers block windows opened after a network request).
+// Two taps: "Connect Telegram" (we create a one-time code) → "Open Telegram" (a real link, so
+// phones open the Telegram app; browsers block windows opened after a network request).
+// See TelegramOpenOptions for the tg:// link + fallbacks (some ISPs block t.me).
 import { useState } from 'react';
 import { connectTelegram, disconnectTelegram } from '../../api/supporter.js';
 import { getErrorMessage } from '../../api/client.js';
 import Button from '../ui/Button.jsx';
+import TelegramOpenOptions from './TelegramOpenOptions.jsx';
 
 export default function TelegramConnect({ linkId, connected, onChange }) {
   const [deepLink, setDeepLink] = useState(null);
@@ -49,18 +51,7 @@ export default function TelegramConnect({ linkId, connected, onChange }) {
     <div className="space-y-2">
       {deepLink ? (
         <>
-          <a
-            href={deepLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex min-h-11 w-full items-center justify-center rounded-xl bg-[#229ED9] px-4 text-sm font-semibold text-white hover:brightness-95"
-          >
-            Open Telegram
-          </a>
-          <p className="text-sm text-slate-600">
-            In Telegram, press <strong>Start</strong>. This page updates by itself within a few seconds. The link works
-            once, for 1 hour.
-          </p>
+          <TelegramOpenOptions deepLink={deepLink} />
           {import.meta.env.DEV && (
             <p className="text-xs text-amber-700">
               Dev note: Telegram can only reach Study Buddy once it&apos;s deployed online, so this won&apos;t connect on
