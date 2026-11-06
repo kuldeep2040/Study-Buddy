@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://study-buddy-7o5d.onrender.com/"
+      "destination": "https://study-buddy-7o5d.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
