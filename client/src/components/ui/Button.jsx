@@ -2,10 +2,10 @@
 import Spinner from './Spinner.jsx';
 
 const VARIANTS = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:outline-indigo-600',
-  secondary: 'bg-white text-slate-800 ring-1 ring-slate-300 hover:bg-slate-50 focus-visible:outline-slate-400',
-  danger: 'bg-rose-600 text-white hover:bg-rose-700 focus-visible:outline-rose-600',
-  ghost: 'text-slate-600 hover:bg-slate-100 focus-visible:outline-slate-400',
+  primary: 'bg-brand text-white shadow-sm hover:bg-brand-strong focus-visible:outline-brand',
+  secondary: 'bg-surface text-ink ring-1 ring-line hover:bg-surface-2 focus-visible:outline-faint',
+  danger: 'bg-danger-fill text-white shadow-sm hover:bg-danger-fill-strong focus-visible:outline-danger-fill',
+  ghost: 'text-muted hover:bg-surface-2 focus-visible:outline-faint',
 };
 
 const SIZES = {
@@ -24,7 +24,7 @@ export default function Button({
 }) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition
+      className={`inline-flex items-center justify-center gap-2 rounded-2xl font-semibold transition
         focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60
         ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       disabled={disabled || loading}

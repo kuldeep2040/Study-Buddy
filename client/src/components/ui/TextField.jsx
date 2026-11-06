@@ -7,24 +7,24 @@ export default function TextField({ label, error, hint, className = '', ...input
 
   return (
     <div className={className}>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-slate-700">
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-ink-soft">
         {label}
       </label>
       <input
         id={id}
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy}
-        className={`block min-h-11 w-full rounded-xl border bg-white px-3.5 text-base text-slate-900 shadow-sm
-          placeholder:text-slate-400 focus:outline-none focus:ring-2
-          ${error ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-200'}`}
+        className={`block min-h-11 w-full rounded-xl border bg-surface px-3.5 text-base text-ink shadow-sm
+          placeholder:text-faint focus:outline-none focus:ring-2
+          ${error ? 'border-danger focus:ring-danger-line' : 'border-line focus:border-accent focus:ring-brand-line'}`}
         {...inputProps}
       />
       {error ? (
-        <p id={`${id}-error`} className="mt-1.5 text-sm text-rose-600">
+        <p id={`${id}-error`} className="mt-1.5 text-sm text-danger">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="mt-1.5 text-sm text-slate-500">
+        <p id={`${id}-hint`} className="mt-1.5 text-sm text-muted">
           {hint}
         </p>
       ) : null}

@@ -28,7 +28,7 @@ export default function TelegramConnect({ linkId, connected, onChange }) {
   if (connected) {
     return (
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium text-emerald-700">✅ Telegram connected</p>
+        <p className="text-sm font-medium text-success">✅ Telegram connected</p>
         <Button
           variant="ghost"
           loading={busy}
@@ -42,7 +42,7 @@ export default function TelegramConnect({ linkId, connected, onChange }) {
         >
           Disconnect
         </Button>
-        {error && <p className="w-full text-sm text-rose-600">{error}</p>}
+        {error && <p className="w-full text-sm text-danger">{error}</p>}
       </div>
     );
   }
@@ -53,7 +53,7 @@ export default function TelegramConnect({ linkId, connected, onChange }) {
         <>
           <TelegramOpenOptions deepLink={deepLink} />
           {import.meta.env.DEV && (
-            <p className="text-xs text-amber-700">
+            <p className="text-xs text-warn-ink">
               Dev note: Telegram can only reach Study Buddy once it&apos;s deployed online, so this won&apos;t connect on
               localhost.
             </p>
@@ -68,7 +68,7 @@ export default function TelegramConnect({ linkId, connected, onChange }) {
           Connect Telegram
         </Button>
       )}
-      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </div>
   );
 }

@@ -48,17 +48,17 @@ export default function HistoryList({ fetchPage, emptyText = 'No study sessions 
 
   if (status === 'loading') {
     return (
-      <Card className="flex items-center justify-center gap-3 py-10 text-slate-600">
-        <Spinner className="h-5 w-5 text-indigo-600" /> Loading history…
+      <Card className="flex items-center justify-center gap-3 py-10 text-muted">
+        <Spinner className="h-5 w-5 text-accent" /> Loading history…
       </Card>
     );
   }
-  if (status === 'error') return <Card className="text-center text-slate-700">{error}</Card>;
+  if (status === 'error') return <Card className="text-center text-ink-soft">{error}</Card>;
 
   return (
     <div className="space-y-3">
-      {days.length === 0 && !nextBefore && <Card className="text-center text-slate-600">{emptyText}</Card>}
-      {days.length === 0 && nextBefore && <p className="text-sm text-slate-600">No sessions in the last 2 weeks.</p>}
+      {days.length === 0 && !nextBefore && <Card className="text-center text-muted">{emptyText}</Card>}
+      {days.length === 0 && nextBefore && <p className="text-sm text-muted">No sessions in the last 2 weeks.</p>}
       {days.map((day) => (
         <HistoryDay key={day.date} day={day} />
       ))}
@@ -67,7 +67,7 @@ export default function HistoryList({ fetchPage, emptyText = 'No study sessions 
           Show older days
         </Button>
       )}
-      {error && status === 'ready' && <p className="text-sm text-rose-600">{error}</p>}
+      {error && status === 'ready' && <p className="text-sm text-danger">{error}</p>}
     </div>
   );
 }

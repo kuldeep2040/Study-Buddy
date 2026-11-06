@@ -5,6 +5,9 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import AuthProvider from './context/AuthProvider.jsx';
+import { initTheme } from './utils/theme.js';
+
+initTheme(); // light/dark (and keep following the phone's setting while on "Auto")
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

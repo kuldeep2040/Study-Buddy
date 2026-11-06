@@ -1,10 +1,9 @@
-// Settings: "Require a supporter before studying" switch (off by default). Saves immediately.
+// Settings → "Study rules" section: "Require a supporter before studying" switch (off by default). Saves immediately.
 import { useState } from 'react';
 import { updateSettings } from '../../api/settings.js';
 import { getErrorMessage } from '../../api/client.js';
-import Card from '../ui/Card.jsx';
 
-export default function StudyRulesCard({ settings, onSaved }) {
+export default function StudyRulesSettings({ settings, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const on = settings.requireSupporterBeforeStudy;
@@ -22,13 +21,13 @@ export default function StudyRulesCard({ settings, onSaved }) {
   }
 
   return (
-    <Card>
+    <div>
       <div className="flex items-start gap-4">
         <div className="flex-1">
-          <h2 id="require-supporter-label" className="font-semibold text-slate-900">
+          <p id="require-supporter-label" className="font-semibold text-ink">
             Require a supporter before studying
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
+          </p>
+          <p className="mt-1 text-sm text-muted">
             When on, the Start button is hidden until at least one supporter is linked. Off by default: you can always
             study solo.
           </p>
@@ -41,12 +40,12 @@ export default function StudyRulesCard({ settings, onSaved }) {
           aria-labelledby="require-supporter-label"
           disabled={saving}
           onClick={toggle}
-          className={`relative mt-1 h-8 w-14 shrink-0 rounded-full transition disabled:opacity-60 ${on ? 'bg-indigo-600' : 'bg-slate-300'}`}
+          className={`relative mt-1 h-8 w-14 shrink-0 rounded-full transition disabled:opacity-60 ${on ? 'bg-brand' : 'bg-line'}`}
         >
-          <span className={`absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow transition ${on ? 'translate-x-6' : ''}`} />
+          <span className={`absolute top-1 left-1 h-6 w-6 rounded-full bg-surface shadow transition ${on ? 'translate-x-6' : ''}`} />
         </button>
       </div>
-      {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
-    </Card>
+      {error && <p className="mt-2 text-sm text-danger">{error}</p>}
+    </div>
   );
 }

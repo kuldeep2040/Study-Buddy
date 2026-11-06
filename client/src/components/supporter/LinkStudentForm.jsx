@@ -1,4 +1,4 @@
-// Supporter enters the invite code the student created → sends a REQUEST the student must accept.
+// Supporter enters the invite code the student created → linked straight away (no waiting).
 import { useState } from 'react';
 import { redeemInvite } from '../../api/links.js';
 import { getFormErrors } from '../../api/client.js';
@@ -6,20 +6,20 @@ import Button from '../ui/Button.jsx';
 import Alert from '../ui/Alert.jsx';
 import TextField from '../ui/TextField.jsx';
 
-export default function LinkStudentForm({ onRequested, onSubmitting }) {
+export default function LinkStudentForm({ onLinked, onSubmitting }) {
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   async function handleSubmit(event) {
     event.preventDefault();
-    onSubmitting?.(); // lets the page clear an old "Request sent" message
+    onSubmitting?.(); // lets the page clear an old success message
     setSubmitting(true);
     setError('');
     try {
-      const result = await redeemInvite(code); // { linkId, status: 'pending', telegramConnected, student }
+      const result = await redeemInvite(code); // { linkId, status: 'active', telegramConnected, student }
       setCode('');
-      onRequested(result);
+      onLinked(result);
     } catch (err) {
       const { formError, fieldErrors } = getFormErrors(err);
       setError(fieldErrors.code || formError);
@@ -44,7 +44,7 @@ export default function LinkStudentForm({ onRequested, onSubmitting }) {
           className="min-w-0 flex-1"
         />
         <Button type="submit" loading={submitting} disabled={!code.trim()}>
-          Send request
+          Link
         </Button>
       </div>
       <Alert tone="error">{error}</Alert>

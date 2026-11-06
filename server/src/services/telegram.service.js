@@ -38,7 +38,7 @@ export async function sendTelegramMessage(chatId, text) {
 
 /**
  * Which chats should hear about this student? Every ACTIVE link that has connected Telegram.
- * (Pending or ended links get nothing.) `distinct` = each chat only once, even if listed twice.
+ * (Ended links get nothing.) `distinct` = each chat only once, even if listed twice.
  */
 async function getRecipientChatIds(studentId) {
   return SupportLink.distinct('telegramChatId', { studentId, status: 'active', telegramChatId: { $ne: null } });
@@ -75,12 +75,8 @@ export function notifySessionStopped(student, session, todayTotalMinutes) {
   );
 }
 
-export function notifyLinkAccepted(link, studentName) {
-  return notifyLinkSupporter(link, `🎉 ${studentName} accepted your request. You'll get their study updates here.`);
-}
-
-export function notifyLinkEndedByStudent(link, studentName) {
-  return notifyLinkSupporter(link, `ℹ️ ${studentName} removed you as a supporter. You won't get their updates anymore.`);
+export function notifyLinkStarted(link, studentName) {
+  return notifyLinkSupporter(link, `🎉 You're now following ${studentName}. You'll get their study updates here.`);
 }
 
 export function notifySessionAutoStopped(student, session) {

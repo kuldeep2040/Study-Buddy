@@ -1,10 +1,10 @@
 // Plain-language list of exactly what linked supporters can and can't see. (Transparency principle.)
 // ⚠️ If a future feature shares something new, it MUST be added here.
-import Card from '../ui/Card.jsx';
 
 const CAN = [
   'When you are studying: the subject and how long it has been running',
-  "Today's total study time",
+  "Today's total study time, your daily goal and how close you are to it",
+  'This week: hours per day and per subject',
   'Your full study history (days, totals, subjects and sessions), including days before they linked',
   'A Telegram message when you start and stop studying, if they connected Telegram',
 ];
@@ -12,14 +12,13 @@ const CAN = [
 const CANNOT = [
   'Change anything: they have read-only access',
   'See your email, password or settings',
-  'See anything before you accept their request, or after you remove them',
+  'See anything after they stop following you',
 ];
 
-export default function SharingInfoCard() {
+export default function SharingInfo() {
   return (
-    <Card>
-      <h2 className="font-semibold text-slate-900">What your supporters can see</h2>
-      <ul className="mt-3 space-y-2 text-sm text-slate-700">
+    <div>
+      <ul className="space-y-2 text-sm text-ink-soft">
         {CAN.map((item) => (
           <li key={item} className="flex gap-2">
             <span aria-hidden="true">✅</span>
@@ -27,8 +26,8 @@ export default function SharingInfoCard() {
           </li>
         ))}
       </ul>
-      <h3 className="mt-4 text-sm font-semibold text-slate-900">They can&apos;t:</h3>
-      <ul className="mt-2 space-y-2 text-sm text-slate-700">
+      <h3 className="mt-4 text-sm font-semibold text-ink">They can&apos;t:</h3>
+      <ul className="mt-2 space-y-2 text-sm text-ink-soft">
         {CANNOT.map((item) => (
           <li key={item} className="flex gap-2">
             <span aria-hidden="true">🚫</span>
@@ -36,6 +35,6 @@ export default function SharingInfoCard() {
           </li>
         ))}
       </ul>
-    </Card>
+    </div>
   );
 }

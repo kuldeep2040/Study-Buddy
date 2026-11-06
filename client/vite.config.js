@@ -16,8 +16,8 @@ export default defineConfig({
         name: 'Study Buddy',
         short_name: 'Study Buddy',
         description: 'Track your study time, stay focused, and keep improving.',
-        theme_color: '#4f46e5',
-        background_color: '#f8fafc',
+        theme_color: '#12756a',
+        background_color: '#f5f3ee',
         display: 'standalone',
         start_url: '/',
         icons: [

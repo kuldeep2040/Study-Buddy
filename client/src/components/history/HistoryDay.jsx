@@ -1,6 +1,7 @@
 // One day in the history: date, total, subjects. Tap to see that day's sessions.
 import { useState } from 'react';
 import { formatDuration, formatTime, todayIst } from '../../utils/format.js';
+import { subjectColor } from '../../utils/subjectColors.js';
 
 const dayFormatter = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short' });
 
@@ -16,7 +17,7 @@ export default function HistoryDay({ day }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <article className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/70">
+    <article className="rounded-3xl bg-surface shadow-sm shadow-black/[0.04]">
       <button
         type="button"
         aria-expanded={open}
@@ -24,32 +25,33 @@ export default function HistoryDay({ day }) {
         className="flex w-full items-start gap-3 p-4 text-left"
       >
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-slate-900">{dayLabel(day.date)}</p>
+          <p className="font-semibold text-ink">{dayLabel(day.date)}</p>
           <p className="mt-1 flex flex-wrap gap-1.5">
             {day.subjects.map((s) => (
-              <span key={s.subject} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
+              <span key={s.subject} className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-xs text-ink-soft">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: subjectColor(s.subject) }} aria-hidden="true" />
                 {s.subject} {formatDuration(s.minutes)}
               </span>
             ))}
           </p>
         </div>
-        <span className="text-lg font-bold text-slate-900 tabular-nums">{formatDuration(day.totalMinutes)}</span>
-        <span aria-hidden="true" className={`mt-1 text-slate-400 transition ${open ? 'rotate-90' : ''}`}>
+        <span className="font-bold text-ink tabular-nums">{formatDuration(day.totalMinutes)}</span>
+        <span aria-hidden="true" className={`mt-1 text-faint transition ${open ? 'rotate-90' : ''}`}>
           ›
         </span>
       </button>
 
       {open && (
-        <ul className="divide-y divide-slate-100 border-t border-slate-100 px-4">
+        <ul className="divide-y divide-line border-t border-line px-4">
           {day.sessions.map((session) => (
             <li key={session.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-              <span className="min-w-0 truncate text-slate-800">{session.subject}</span>
-              <span className="text-slate-500">
+              <span className="min-w-0 truncate text-ink">{session.subject}</span>
+              <span className="text-muted">
                 {formatTime(session.startTime)}
                 {session.endTime ? ` – ${formatTime(session.endTime)}` : ' (in progress)'}
                 {session.status === 'auto-stopped' && ' · auto-stopped'}
               </span>
-              <span className="font-semibold text-slate-700 tabular-nums">{formatDuration(session.durationMinutes)}</span>
+              <span className="font-semibold text-ink-soft tabular-nums">{formatDuration(session.durationMinutes)}</span>
             </li>
           ))}
         </ul>

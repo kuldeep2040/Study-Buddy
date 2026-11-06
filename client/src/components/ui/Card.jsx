@@ -1,7 +1,8 @@
-// A white rounded panel — the basic building block of every screen.
-export default function Card({ as: Tag = 'section', className = '', children, ...props }) {
+// A rounded panel on the warm background — the basic building block of every screen.
+// `pad` sets the inner spacing (a separate prop, because two padding classes in one string clash).
+export default function Card({ as: Tag = 'section', pad = 'p-4', className = '', children, ...props }) {
   return (
-    <Tag className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 ${className}`} {...props}>
+    <Tag className={`rounded-3xl bg-surface shadow-sm shadow-black/[0.04] ${pad} ${className}`} {...props}>
       {children}
     </Tag>
   );

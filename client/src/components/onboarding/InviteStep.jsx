@@ -45,9 +45,8 @@ export default function InviteStep({ examName, onBack }) {
       <div className="space-y-4">
         <Alert tone="error">{error}</Alert>
         <InviteCodeCard pendingInvite={pendingInvite} onInviteChange={setPendingInvite} examName={examName} />
-        <p className="text-sm text-slate-600">
-          They sign up as a <strong>supporter</strong> and enter your code. Then <strong>you</strong> accept their request,
-          and nothing is shared until you do.
+        <p className="text-sm text-muted">
+          They sign up as a <strong>supporter</strong> and enter your code. Nothing is shared until they do.
         </p>
         <div className="flex gap-2">
           <Button variant="secondary" size="lg" onClick={onBack}>

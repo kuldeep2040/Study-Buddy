@@ -60,7 +60,7 @@ export default function ExamStep({ settings, onDone }) {
           error={fieldErrors.examDate}
         />
         {daysLeft !== null && daysLeft >= 0 && (
-          <p className="rounded-xl bg-indigo-50 px-4 py-3 text-center text-indigo-900">
+          <p className="rounded-xl bg-brand-soft px-4 py-3 text-center text-ink">
             📅 <strong>{daysLeft}</strong> {daysLeft === 1 ? 'day' : 'days'} to go. Let&apos;s make them count!
           </p>
         )}

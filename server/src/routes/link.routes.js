@@ -14,12 +14,10 @@ linkRouter.use(requireAuth); // everything here needs a login
 // Student
 linkRouter.post('/invite', requireRole('student'), linkController.createInvite);
 linkRouter.get('/', requireRole('student'), linkController.listMine);
-linkRouter.post('/:linkId/accept', requireRole('student'), withLinkId, linkController.accept);
-linkRouter.post('/:linkId/decline', requireRole('student'), withLinkId, linkController.decline);
 
 // Supporter
 linkRouter.post('/redeem', requireRole('supporter'), validate({ body: redeemSchema }), linkController.redeem);
 
-// Either role — the service checks the user is actually part of this link.
+// Either role — the service checks the user is part of this link (and what that side may do).
 linkRouter.post('/:linkId/dismiss-notice', withLinkId, linkController.dismissNotice);
 linkRouter.delete('/:linkId', withLinkId, linkController.end);

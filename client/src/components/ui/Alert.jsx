@@ -1,8 +1,8 @@
 // A coloured message box: errors, successes, or neutral info.
 const TONES = {
-  error: 'bg-rose-50 text-rose-800 ring-rose-200',
-  success: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
-  info: 'bg-indigo-50 text-indigo-900 ring-indigo-200',
+  error: 'bg-danger-soft text-danger ring-danger-line',
+  success: 'bg-success-soft text-success ring-success-line',
+  info: 'bg-brand-soft text-ink ring-brand-line',
 };
 
 export default function Alert({ tone = 'info', children, className = '' }) {
@@ -10,7 +10,7 @@ export default function Alert({ tone = 'info', children, className = '' }) {
   return (
     <div
       role={tone === 'error' ? 'alert' : 'status'}
-      className={`rounded-xl px-4 py-3 text-sm ring-1 ${TONES[tone]} ${className}`}
+      className={`rounded-2xl px-4 py-3 text-sm ring-1 ${TONES[tone]} ${className}`}
     >
       {children}
     </div>

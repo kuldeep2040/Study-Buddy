@@ -28,18 +28,18 @@ export default function SoloBanner() {
   }
 
   return (
-    <div className="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <div className="flex items-start gap-3 rounded-3xl bg-surface p-4 shadow-sm shadow-black/[0.04]">
       <span className="text-2xl" aria-hidden="true">
         🧑‍🚀
       </span>
       <div className="flex-1">
-        <p className="font-semibold text-slate-900">You&apos;re studying solo.</p>
-        <p className="text-sm text-slate-600">Invite a supporter to stay accountable.</p>
+        <p className="font-semibold text-ink">You&apos;re studying solo.</p>
+        <p className="text-sm text-muted">Invite a supporter to stay accountable.</p>
         <div className="mt-2 flex gap-2">
-          <Link to="/settings" className="flex min-h-11 items-center rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700">
+          <Link to="/settings" className="flex min-h-11 items-center rounded-2xl bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-strong">
             Invite someone
           </Link>
-          <button type="button" onClick={dismiss} className="min-h-11 rounded-xl px-3 text-sm font-medium text-slate-600 hover:bg-slate-100">
+          <button type="button" onClick={dismiss} className="min-h-11 rounded-2xl px-3 text-sm font-medium text-muted hover:bg-surface-2">
             Not today
           </button>
         </div>

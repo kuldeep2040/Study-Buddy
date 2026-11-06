@@ -25,14 +25,14 @@ export default function SubjectChipsEditor({ subjectsState }) {
     <div className="space-y-3">
       <ul className="flex flex-wrap gap-2" aria-label="Your subjects">
         {subjects.map((subject) => (
-          <li key={subject.id} className="flex min-h-11 items-center gap-1 rounded-full bg-indigo-50 pr-1 pl-4 text-sm font-semibold text-indigo-800 ring-1 ring-indigo-200">
+          <li key={subject.id} className="flex min-h-11 items-center gap-1 rounded-full bg-brand-soft pr-1 pl-4 text-sm font-semibold text-accent ring-1 ring-brand-line">
             {subject.name}
             <button
               type="button"
               aria-label={`Remove ${subject.name}`}
               disabled={busy || subjects.length <= 1}
               onClick={() => run(() => remove(subject.id))}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-indigo-500 hover:bg-indigo-100 disabled:opacity-30"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-accent hover:bg-brand-soft disabled:opacity-30"
             >
               ×
             </button>
@@ -55,13 +55,13 @@ export default function SubjectChipsEditor({ subjectsState }) {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           maxLength={30}
-          className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 px-3.5 text-base placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none"
+          className="min-h-11 min-w-0 flex-1 rounded-xl border border-line px-3.5 text-base placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-brand-line focus:outline-none"
         />
         <Button type="submit" variant="secondary" loading={busy} disabled={!newName.trim()}>
           Add
         </Button>
       </form>
-      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </div>
   );
 }

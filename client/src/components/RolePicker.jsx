@@ -17,7 +17,7 @@ const ROLE_OPTIONS = [
 export default function RolePicker({ value, onChange, error }) {
   return (
     <fieldset>
-      <legend className="mb-1.5 block text-sm font-medium text-slate-700">Who are you?</legend>
+      <legend className="mb-1.5 block text-sm font-medium text-ink-soft">Who are you?</legend>
       <div className="grid gap-3 sm:grid-cols-2">
         {ROLE_OPTIONS.map((option) => {
           const selected = value === option.value;
@@ -25,7 +25,7 @@ export default function RolePicker({ value, onChange, error }) {
             <label
               key={option.value}
               className={`flex cursor-pointer gap-3 rounded-2xl p-4 ring-2 transition ${
-                selected ? 'bg-indigo-50 ring-indigo-500' : 'bg-white ring-slate-200 hover:ring-slate-300'
+                selected ? 'bg-brand-soft ring-accent' : 'bg-surface ring-line hover:ring-line'
               }`}
             >
               {/* The real radio input is visually hidden but still works with keyboard + screen readers */}
@@ -41,14 +41,14 @@ export default function RolePicker({ value, onChange, error }) {
                 {option.emoji}
               </span>
               <span>
-                <span className="block font-semibold text-slate-900">{option.title}</span>
-                <span className="block text-sm text-slate-600">{option.description}</span>
+                <span className="block font-semibold text-ink">{option.title}</span>
+                <span className="block text-sm text-muted">{option.description}</span>
               </span>
             </label>
           );
         })}
       </div>
-      {error && <p className="mt-1.5 text-sm text-rose-600">{error}</p>}
+      {error && <p className="mt-1.5 text-sm text-danger">{error}</p>}
     </fieldset>
   );
 }

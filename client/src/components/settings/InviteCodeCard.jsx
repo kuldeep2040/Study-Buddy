@@ -1,6 +1,6 @@
 // Create / show / copy / share / cancel the one-time invite code a supporter enters.
 // Used in student onboarding (step 3) and in Settings.
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createInvite, endLink } from '../../api/links.js';
 import { getErrorMessage } from '../../api/client.js';
 import { prettyCode, whatsappInviteUrl } from '../../utils/share.js';
@@ -11,7 +11,8 @@ function hoursLeft(expiresAt) {
   return Math.max(1, Math.ceil((Date.parse(expiresAt) - Date.now()) / 3600000));
 }
 
-export default function InviteCodeCard({ pendingInvite, onInviteChange, examName }) {
+// `autoCreate`: make a code right away if there isn't one (used by the profile menu's "Invite a supporter").
+export default function InviteCodeCard({ pendingInvite, onInviteChange, examName, autoCreate = false }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -30,6 +31,14 @@ export default function InviteCodeCard({ pendingInvite, onInviteChange, examName
   }
 
   const handleCreate = () => run(async () => onInviteChange(await createInvite()));
+
+  // Only once per visit (a ref survives re-renders, and React's dev double-run of effects).
+  const autoCreated = useRef(false);
+  useEffect(() => {
+    if (!autoCreate || pendingInvite || autoCreated.current) return;
+    autoCreated.current = true;
+    handleCreate();
+  }); // eslint-disable-line react-hooks/exhaustive-deps
   const handleCancel = () =>
     run(async () => {
       await endLink(pendingInvite.linkId);
@@ -48,14 +57,19 @@ export default function InviteCodeCard({ pendingInvite, onInviteChange, examName
   return (
     <div className="space-y-3">
       <Alert tone="error">{error}</Alert>
+      {/* Linking is permanent from the student's side, so say so BEFORE the code is shared. */}
+      <p className="rounded-xl bg-warn-soft px-3 py-2 text-sm text-warn-ink ring-1 ring-warn-line">
+        Whoever enters this code becomes your supporter <strong>right away</strong>, and only they can end the link.
+        Share it only with someone you trust.
+      </p>
 
       {pendingInvite ? (
-        <div className="space-y-3 rounded-2xl bg-slate-50 p-4 text-center ring-1 ring-slate-200">
-          <p className="text-xs font-medium tracking-wide text-slate-500 uppercase">Your invite code</p>
-          <p className="font-mono text-4xl font-bold tracking-widest text-slate-900 select-all" data-testid="invite-code">
+        <div className="space-y-3 rounded-2xl bg-surface-2 p-4 text-center ring-1 ring-line">
+          <p className="text-xs font-medium tracking-wide text-muted uppercase">Your invite code</p>
+          <p className="font-mono text-3xl font-bold tracking-widest text-ink select-all" data-testid="invite-code">
             {prettyCode(pendingInvite.code)}
           </p>
-          <p className="text-sm text-slate-500">Works once · expires in {hoursLeft(pendingInvite.expiresAt)} hours</p>
+          <p className="text-sm text-muted">Works once · expires in {hoursLeft(pendingInvite.expiresAt)} hours</p>
           <a
             href={whatsappInviteUrl({ code: pendingInvite.code, examName })}
             target="_blank"

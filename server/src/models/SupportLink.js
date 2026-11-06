@@ -1,12 +1,13 @@
 // The connection between ONE student and ONE supporter (many-to-many overall).
 //
-// Lifecycle:
-//   student creates invite  → 'invited'  { inviteCode, inviteExpiresAt }   (auto-deleted after 24h)
-//   supporter enters code   → 'pending'  { supporterId, requestedAt }      (waits for the student)
-//   student accepts         → 'active'   { activatedAt }                    (supporter can see data)
-//   student declines        → 'declined' { endedBy: 'student', endedAt }
-//   either side ends it     → 'revoked'  { endedBy, endedAt }               (kept for history)
-// After 'declined'/'revoked', the OTHER side sees a message until they dismiss it (noticeSeen).
+// Lifecycle (owner's decision 2026-11-06: no accept/decline, and only the supporter can end a link):
+//   student creates invite      → 'invited' { inviteCode, inviteExpiresAt }        (auto-deleted after 24h)
+//   supporter enters the code   → 'active'  { supporterId, activatedAt }            (supporter can see data)
+//   supporter stops following   → 'revoked' { endedBy: 'supporter', endedAt }       (kept for history)
+// The student sees "X is now your supporter" once (joinedNoticeSeen) and "X stopped following" once (noticeSeen).
+//
+// 'pending' and 'declined' are LEGACY (the old accept/decline flow). No code creates them anymore;
+// they stay in the enum so old documents remain valid. Old pending links are made active at startup (db.js).
 import mongoose from 'mongoose';
 
 export const LINK_STATUS = ['invited', 'pending', 'active', 'declined', 'revoked'];
@@ -21,11 +22,14 @@ const supportLinkSchema = new mongoose.Schema(
     inviteCode: { type: String },
     inviteExpiresAt: { type: Date },
 
-    requestedAt: { type: Date }, // supporter entered the code
-    activatedAt: { type: Date }, // student accepted
+    requestedAt: { type: Date }, // legacy: when a supporter sent a request in the old flow
+    activatedAt: { type: Date }, // supporter entered the code (= linked)
+    // false = the student hasn't dismissed "X is now your supporter" yet. No default on purpose:
+    // links made before this field existed have no value, so they don't suddenly show a message.
+    joinedNoticeSeen: { type: Boolean },
 
     // Ending
-    endedBy: { type: String, enum: ['student', 'supporter'] },
+    endedBy: { type: String, enum: ['student', 'supporter'] }, // 'student' only on legacy links
     endedAt: { type: Date },
     noticeSeen: { type: Boolean, default: false }, // the OTHER side dismissed the "link ended" message
 
@@ -38,7 +42,8 @@ const supportLinkSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// The same pair can't have two OPEN links (pending or active) — but can link again after it ended.
+// The same pair can't have two OPEN links — but can link again after it ended. ('pending' is legacy;
+// it stays in the filter so the existing index in MongoDB doesn't have to be rebuilt.)
 // Also the main lookup for permission checks (requireLinkedStudent).
 supportLinkSchema.index(
   { studentId: 1, supporterId: 1 },

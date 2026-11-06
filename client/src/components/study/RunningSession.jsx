@@ -1,4 +1,4 @@
-// Shown while a session is running: big live timer + Stop button.
+// Shown while a session is running: a big circle with the live timer, then Stop.
 // The timer is NOT a counter that adds 1 every second. Each tick it recalculates
 // "now − startTime" (corrected by the server clock offset), so it's always right — even after
 // a refresh, a closed tab, or the phone sleeping.
@@ -27,26 +27,24 @@ export default function RunningSession({ session, clockOffsetMs, onStop, stoppin
   }, [reachedLimit, onLimitReached]);
 
   return (
-    <div className="text-center">
-      <p className="text-sm font-medium text-indigo-700">
-        <span className="mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
-        Studying {session.subject}
-      </p>
-      <p
-        className="mt-2 text-6xl font-bold tracking-tight text-slate-900 tabular-nums"
-        role="timer"
-        aria-label={`Elapsed time ${clock}`}
-      >
-        {clock}
-      </p>
-      <p className="mt-1 text-sm text-slate-500">Started at {formatTime(session.startTime)}</p>
+    <div className="flex flex-col items-center text-center">
+      <div className="rounded-full bg-accent-soft/30 p-2.5">
+        <div className="flex h-44 w-44 flex-col items-center justify-center rounded-full bg-surface shadow-sm ring-[6px] ring-accent">
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-accent">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-success" aria-hidden="true" />
+            Studying {session.subject}
+          </p>
+          <p className="mt-1 text-4xl font-bold tracking-tight text-ink tabular-nums" role="timer" aria-label={`Elapsed time ${clock}`}>
+            {clock}
+          </p>
+          <p className="mt-0.5 text-xs text-muted">since {formatTime(session.startTime)}</p>
+        </div>
+      </div>
 
-      <Button variant="danger" size="lg" className="mt-6 w-full" loading={stopping} onClick={onStop}>
+      <Button variant="danger" className="mt-4 w-full max-w-xs rounded-full" loading={stopping} onClick={onStop}>
         ⏹ Stop
       </Button>
-      <p className="mt-3 text-xs text-slate-500">
-        Forgot to stop? Sessions stop automatically after {AUTO_STOP_HOURS} hours.
-      </p>
+      <p className="mt-2 text-xs text-muted">Forgot to stop? Sessions stop automatically after {AUTO_STOP_HOURS} hours.</p>
     </div>
   );
 }

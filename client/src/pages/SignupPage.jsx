@@ -50,7 +50,7 @@ export default function SignupPage() {
       footer={
         <>
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-indigo-600 hover:underline">
+          <Link to="/login" className="font-semibold text-accent hover:underline">
             Log in
           </Link>
         </>
@@ -94,8 +94,7 @@ export default function SignupPage() {
         />
         {form.role === 'student' && (
           <Alert tone="info">
-            🔒 Your data is private. Nobody can see it unless <strong>you</strong> invite them, and you can remove
-            them any time.
+            🔒 Your data is private. Nobody can see it unless <strong>you</strong> share an invite code with them.
           </Alert>
         )}
         <Button type="submit" size="lg" loading={submitting} className="w-full">

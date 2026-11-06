@@ -1,39 +1,51 @@
-// One linked student on the supporter dashboard. Tapping it opens the read-only detail view.
+// One linked student on the supporter dashboard: avatar, live status, today vs goal.
+// Tapping it opens the read-only detail view.
 import { Link } from 'react-router-dom';
 import { useLiveStudentStats } from '../../hooks/useLiveStudentStats.js';
 import { formatClock, formatDuration } from '../../utils/format.js';
+import Icon from '../ui/Icon.jsx';
 
 export default function StudentCard({ student, serverTime, receivedAt }) {
   const { elapsedMs, totalMinutes } = useLiveStudentStats(student, serverTime, receivedAt);
   const active = student.activeSession;
+  const goal = student.dailyGoalMinutes;
+  const progress = goal ? Math.min(totalMinutes / goal, 1) : 0;
 
   return (
     <Link
       to={`/supporter/students/${student.studentId}`}
-      className="block rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 transition hover:ring-indigo-300"
+      className="block rounded-3xl bg-surface p-4 shadow-sm shadow-black/[0.04] transition hover:ring-2 hover:ring-brand-line"
     >
-      <div className="flex items-center justify-between gap-3">
-        <p className="truncate text-lg font-semibold text-slate-900">{student.name}</p>
-        <span aria-hidden="true" className="text-slate-400">
-          ›
-        </span>
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand text-lg font-bold text-white" aria-hidden="true">
+          {student.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-bold text-ink">{student.name}</p>
+          {active ? (
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-success">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-success" aria-hidden="true" />
+              Studying {active.subject} · <span className="tabular-nums">{formatClock(elapsedMs)}</span>
+            </p>
+          ) : (
+            <p className="text-sm text-muted">Not studying right now</p>
+          )}
+        </div>
+        <Icon name="chevron" className="h-5 w-5 text-faint" />
       </div>
 
-      {active ? (
-        <p className="mt-1 text-sm font-medium text-emerald-700">
-          <span className="mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
-          Studying {active.subject} · <span className="tabular-nums">{formatClock(elapsedMs)}</span>
-        </p>
-      ) : (
-        <p className="mt-1 text-sm text-slate-500">Not studying right now</p>
-      )}
-
-      <p className="mt-3 flex items-center justify-between text-sm text-slate-600">
-        <span>
-          Today: <strong className="text-slate-900 tabular-nums">{formatDuration(totalMinutes)}</strong>
+      <div className="mt-3 flex items-baseline justify-between text-sm">
+        <span className="text-muted">
+          Today <strong className="text-ink tabular-nums">{formatDuration(totalMinutes)}</strong>
+          {goal > 0 && <> of {formatDuration(goal)}</>}
         </span>
-        <span className="text-xs text-slate-500">{student.telegramConnected ? '📱 Telegram on' : 'Telegram off'}</span>
-      </p>
+        <span className="text-xs text-muted">{student.telegramConnected ? '📱 Telegram on' : 'Telegram off'}</span>
+      </div>
+      {goal > 0 && (
+        <div className="mt-2 h-2 rounded-full bg-surface-2" aria-hidden="true">
+          <div className="h-2 rounded-full bg-accent" style={{ width: `${progress * 100}%` }} />
+        </div>
+      )}
     </Link>
   );
 }

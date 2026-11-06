@@ -9,13 +9,13 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
         <span className="text-xl font-bold tracking-tight">Study Buddy</span>
       </Link>
 
-      <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70 sm:p-8">
+      <div className="rounded-3xl bg-surface p-6 shadow-sm ring-1 ring-line sm:p-8">
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-1 text-slate-600">{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-muted">{subtitle}</p>}
         <div className="mt-6">{children}</div>
       </div>
 
-      {footer && <p className="mt-6 text-center text-sm text-slate-600">{footer}</p>}
+      {footer && <p className="mt-6 text-center text-sm text-muted">{footer}</p>}
     </main>
   );
 }

@@ -15,10 +15,10 @@ export default function FullPageStatus({ message = 'Loading…' }) {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center">
-      <Spinner className="h-8 w-8 text-indigo-600" />
-      <p className="font-medium text-slate-700">{isSlow ? 'Waking up the server… ☕' : message}</p>
+      <Spinner className="h-8 w-8 text-accent" />
+      <p className="font-medium text-ink-soft">{isSlow ? 'Waking up the server… ☕' : message}</p>
       {isSlow && (
-        <p className="max-w-xs text-sm text-slate-500">
+        <p className="max-w-xs text-sm text-muted">
           The first visit after a break can take up to a minute. Thanks for your patience!
         </p>
       )}

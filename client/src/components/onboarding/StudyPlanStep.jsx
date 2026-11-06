@@ -32,18 +32,18 @@ export default function StudyPlanStep({ settings, onBack, onDone }) {
       <div className="space-y-6">
         <Alert tone="error">{error}</Alert>
         <section>
-          <h2 className="mb-2 font-semibold text-slate-900">Subjects</h2>
+          <h2 className="mb-2 font-semibold text-ink">Subjects</h2>
           {subjectsState.status === 'loading' ? (
-            <Spinner className="h-5 w-5 text-indigo-600" />
+            <Spinner className="h-5 w-5 text-accent" />
           ) : subjectsState.status === 'error' ? (
-            <p className="text-sm text-rose-600">{subjectsState.error}</p>
+            <p className="text-sm text-danger">{subjectsState.error}</p>
           ) : (
             <SubjectChipsEditor subjectsState={subjectsState} />
           )}
         </section>
         <section>
-          <h2 className="font-semibold text-slate-900">Daily goal</h2>
-          <p className="mb-3 text-sm text-slate-600">How long do you want to study each day?</p>
+          <h2 className="font-semibold text-ink">Daily goal</h2>
+          <p className="mb-3 text-sm text-muted">How long do you want to study each day?</p>
           <GoalPicker value={goal} onChange={setGoal} />
         </section>
         <div className="flex gap-2">

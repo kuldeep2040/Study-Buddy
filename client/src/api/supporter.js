@@ -1,7 +1,7 @@
 // Supporter API calls (student data is read-only).
 import { api } from './client.js';
 
-/** → { students: [...], waiting: [...], notices: [...], serverTime } */
+/** → { students: [...], notices: [...], serverTime } */
 export async function getSupporterDashboard({ signal } = {}) {
   const { data } = await api.get('/supporter/students', { signal });
   return data;

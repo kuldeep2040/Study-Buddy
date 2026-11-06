@@ -1,15 +1,14 @@
-// Settings: exam name/date + daily goal. "Save" sends only what changed.
+// Settings → "Exam & daily goal" section: exam name/date + daily goal. "Save" sends only what changed.
 import { useState } from 'react';
 import { updateSettings } from '../../api/settings.js';
 import { getFormErrors } from '../../api/client.js';
 import { todayIst } from '../../utils/format.js';
-import Card from '../ui/Card.jsx';
 import TextField from '../ui/TextField.jsx';
 import Button from '../ui/Button.jsx';
 import Alert from '../ui/Alert.jsx';
 import GoalPicker from '../onboarding/GoalPicker.jsx';
 
-export default function ExamGoalCard({ settings, onSaved }) {
+export default function ExamGoalSettings({ settings, onSaved }) {
   const [form, setForm] = useState({
     examName: settings.examName,
     examDate: settings.examDate ?? '',
@@ -44,20 +43,17 @@ export default function ExamGoalCard({ settings, onSaved }) {
   }
 
   return (
-    <Card>
-      <h2 className="font-semibold text-slate-900">Exam &amp; daily goal</h2>
-      <form onSubmit={handleSave} className="mt-4 space-y-4" noValidate>
+    <form onSubmit={handleSave} className="space-y-4" noValidate>
         <TextField label="Exam name" name="examName" maxLength={60} value={form.examName} onChange={(e) => setField('examName', e.target.value)} error={fieldErrors.examName} />
         <TextField label="Exam date" name="examDate" type="date" min={todayIst()} value={form.examDate} onChange={(e) => setField('examDate', e.target.value)} error={fieldErrors.examDate} />
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">Daily goal</p>
+          <p className="mb-2 text-sm font-medium text-ink-soft">Daily goal</p>
           <GoalPicker value={form.dailyGoalMinutes} onChange={(minutes) => setField('dailyGoalMinutes', minutes)} />
         </div>
         <Alert tone={message.tone}>{message.text}</Alert>
         <Button type="submit" className="w-full" loading={saving} disabled={!dirty}>
           Save
         </Button>
-      </form>
-    </Card>
+    </form>
   );
 }

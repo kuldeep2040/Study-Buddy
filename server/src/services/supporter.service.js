@@ -3,27 +3,24 @@ import { SupportLink } from '../models/SupportLink.js';
 import { User } from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import { getTodaySummary } from './session.service.js';
+import { getOrCreateSettings } from './settings.service.js';
 import { listNotices } from './link.service.js';
 
 /**
  * Supporter dashboard:
  *   students → ACTIVE links, each with today's summary
- *   waiting  → requests the students haven't accepted yet (no student data shown!)
- *   notices  → "X declined / removed you" messages not dismissed yet
+ *   notices  → old "X declined / removed you" messages not dismissed yet (legacy: students can't
+ *              decline or remove anymore, but such messages may still exist from before)
  */
 export async function getSupporterDashboard(supporter) {
   const [links, notices] = await Promise.all([
-    SupportLink.find({ supporterId: supporter.id, status: { $in: ['pending', 'active'] } })
-      .populate('studentId', 'name')
-      .sort({ updatedAt: -1 })
-      .lean(),
+    SupportLink.find({ supporterId: supporter.id, status: 'active' }).populate('studentId', 'name').sort({ activatedAt: -1 }).lean(),
     listNotices(supporter),
   ]);
-  const withStudent = links.filter((link) => link.studentId); // skip deleted accounts
 
   const students = await Promise.all(
-    withStudent
-      .filter((link) => link.status === 'active')
+    links
+      .filter((link) => link.studentId) // skip deleted accounts
       .map(async (link) => ({
         ...(await buildStudentOverview({ id: link.studentId._id.toString(), name: link.studentId.name })),
         linkId: link._id.toString(),
@@ -32,16 +29,7 @@ export async function getSupporterDashboard(supporter) {
       })),
   );
 
-  const waiting = withStudent
-    .filter((link) => link.status === 'pending')
-    .map((link) => ({
-      linkId: link._id.toString(),
-      studentName: link.studentId.name,
-      requestedAt: link.requestedAt,
-      telegramConnected: Boolean(link.telegramChatId),
-    }));
-
-  return { students, waiting, notices };
+  return { students, notices };
 }
 
 /** Read-only view of ONE student. Only call after requireLinkedStudent has checked the link! */
@@ -58,15 +46,28 @@ export async function getStudentOverview(studentId, linkId) {
   };
 }
 
-/** Today's data a supporter may see. */
+/**
+ * Today's data a supporter may see. Every field here must be listed in the student's
+ * "What your supporters can see" card (client SharingInfoCard) — transparency rule.
+ */
 async function buildStudentOverview(student) {
-  const today = await getTodaySummary(student);
+  const [today, settings] = await Promise.all([getTodaySummary(student), getOrCreateSettings(student.id)]);
   const running = today.sessions.find((s) => s.status === 'active');
+  const lastFinished = today.sessions.find((s) => s.status !== 'active'); // sessions are newest first
   return {
     studentId: student.id,
     name: student.name,
     date: today.date,
     todayTotalMinutes: today.totalMinutes,
+    dailyGoalMinutes: settings.dailyGoalMinutes, // shared since the redesign (owner OK'd, 2026-11-06)
     activeSession: running ? { subject: running.subject, startTime: running.startTime } : null,
+    lastSession: lastFinished
+      ? {
+          subject: lastFinished.subject,
+          startTime: lastFinished.startTime,
+          endTime: lastFinished.endTime,
+          durationMinutes: lastFinished.durationMinutes,
+        }
+      : null,
   };
 }

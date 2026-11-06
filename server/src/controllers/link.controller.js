@@ -7,12 +7,6 @@ export async function createInvite(req, res) {
 export async function listMine(req, res) {
   res.json(await linkService.listStudentLinks(req.user));
 }
-export async function accept(req, res) {
-  res.json(await linkService.acceptRequest(req.user, req.valid.params.linkId));
-}
-export async function decline(req, res) {
-  res.json(await linkService.declineRequest(req.user, req.valid.params.linkId));
-}
 
 // Supporter
 export async function redeem(req, res) {

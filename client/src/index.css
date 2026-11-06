@@ -1,2 +1,126 @@
-/* The ONLY CSS file. Tailwind generates all the utility classes we use in JSX. */
+/* The ONLY CSS file. Tailwind generates the utility classes; this file only defines our THEME.
+ *
+ * How the theme works:
+ *  1. Every colour is a CSS variable (--sb-…) with a light value and a dark value.
+ *  2. <html data-theme="light|dark"> picks the set. index.html sets it before the page draws
+ *     (Auto follows the phone's setting; Settings → Appearance can force Light or Dark).
+ *  3. The @theme block turns the variables into Tailwind colours, so we write `bg-surface`,
+ *     `text-ink`, `bg-brand`… and dark mode just works everywhere, with no `dark:` classes.
+ */
 @import "tailwindcss";
+
+/* `dark:` variant, for the rare case a component needs it. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root {
+  color-scheme: light;
+  --sb-page: #f5f3ee; /* warm off-white background */
+  --sb-surface: #ffffff; /* cards */
+  --sb-surface-2: #ece8e0; /* chips, tracks, inner panels */
+  --sb-line: #e2ddd3; /* borders, dividers */
+  --sb-ink: #133f3a; /* headings and main text (deep teal-black) */
+  --sb-ink-soft: #34504c;
+  --sb-muted: #5f6b68;
+  --sb-faint: #97a29f;
+  --sb-brand: #12756a; /* buttons, selected chips */
+  --sb-brand-strong: #0d5f56; /* button hover */
+  --sb-brand-soft: #dcece8; /* light teal fills */
+  --sb-brand-line: #a8d0c8;
+  --sb-accent: #12756a; /* teal text, rings, bars (brighter in dark mode) */
+  --sb-accent-soft: #9cc6bf; /* bars that didn't hit the goal, button halo */
+  --sb-highlight: #b4530a; /* "today" bar, streak number */
+  --sb-highlight-soft: #fcefc9; /* streak chip */
+  --sb-success: #1f8a3d;
+  --sb-success-soft: #e4f3e7;
+  --sb-success-line: #b9e0c2;
+  --sb-warn-ink: #8a4b0f;
+  --sb-warn-soft: #fbf1d9;
+  --sb-warn-line: #efd69b;
+  --sb-danger: #c8243f; /* error text */
+  --sb-danger-fill: #d92d4b; /* Stop / danger buttons */
+  --sb-danger-fill-strong: #b91c3c;
+  --sb-danger-soft: #fdecee;
+  --sb-danger-line: #f4c3cc;
+  /* Subject colours (1 = first subject). Same order as the design: teal, pink, purple, green… */
+  --sb-subject-1: #12756a;
+  --sb-subject-2: #db2777;
+  --sb-subject-3: #7c3aed;
+  --sb-subject-4: #65a30d;
+  --sb-subject-5: #ea580c;
+  --sb-subject-6: #0284c7;
+  --sb-subject-7: #ca8a04;
+  --sb-subject-8: #0891b2;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --sb-page: #161618;
+  --sb-surface: #232327;
+  --sb-surface-2: #2e2e33;
+  --sb-line: #3a3a40;
+  --sb-ink: #f4f4f5;
+  --sb-ink-soft: #d6d6da;
+  --sb-muted: #a3a3ab;
+  --sb-faint: #74747c;
+  --sb-brand: #13806f;
+  --sb-brand-strong: #0f6d5f;
+  --sb-brand-soft: #1d3633;
+  --sb-brand-line: #2e5c55;
+  --sb-accent: #2dd4bf;
+  --sb-accent-soft: #2a6a62;
+  --sb-highlight: #fbbf24;
+  --sb-highlight-soft: #3b3220;
+  --sb-success: #4ade80;
+  --sb-success-soft: #17301f;
+  --sb-success-line: #2b5a39;
+  --sb-warn-ink: #fcd34d;
+  --sb-warn-soft: #362d1c;
+  --sb-warn-line: #5c4a22;
+  --sb-danger: #fb7185;
+  --sb-danger-fill: #e11d48;
+  --sb-danger-fill-strong: #be123c;
+  --sb-danger-soft: #3a1c24;
+  --sb-danger-line: #6b2a38;
+  --sb-subject-1: #2dd4bf;
+  --sb-subject-2: #ec4899;
+  --sb-subject-3: #8b5cf6;
+  --sb-subject-4: #84cc16;
+  --sb-subject-5: #fb923c;
+  --sb-subject-6: #38bdf8;
+  --sb-subject-7: #facc15;
+  --sb-subject-8: #22d3ee;
+}
+
+/* `inline` = utilities use the variable directly, so they follow the active theme. */
+@theme inline {
+  --color-page: var(--sb-page);
+  --color-surface: var(--sb-surface);
+  --color-surface-2: var(--sb-surface-2);
+  --color-line: var(--sb-line);
+  --color-ink: var(--sb-ink);
+  --color-ink-soft: var(--sb-ink-soft);
+  --color-muted: var(--sb-muted);
+  --color-faint: var(--sb-faint);
+  --color-brand: var(--sb-brand);
+  --color-brand-strong: var(--sb-brand-strong);
+  --color-brand-soft: var(--sb-brand-soft);
+  --color-brand-line: var(--sb-brand-line);
+  --color-accent: var(--sb-accent);
+  --color-accent-soft: var(--sb-accent-soft);
+  --color-highlight: var(--sb-highlight);
+  --color-highlight-soft: var(--sb-highlight-soft);
+  --color-success: var(--sb-success);
+  --color-success-soft: var(--sb-success-soft);
+  --color-success-line: var(--sb-success-line);
+  --color-warn-ink: var(--sb-warn-ink);
+  --color-warn-soft: var(--sb-warn-soft);
+  --color-warn-line: var(--sb-warn-line);
+  --color-danger: var(--sb-danger);
+  --color-danger-fill: var(--sb-danger-fill);
+  --color-danger-fill-strong: var(--sb-danger-fill-strong);
+  --color-danger-soft: var(--sb-danger-soft);
+  --color-danger-line: var(--sb-danger-line);
+
+  /* Inter if the device has it, otherwise the phone's own system font (no download needed). */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}

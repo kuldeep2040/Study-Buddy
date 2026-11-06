@@ -1,4 +1,5 @@
-// Student ↔ supporter links: invite → request → accept/decline → end. See models/SupportLink.js.
+// Student ↔ supporter links: the student creates a code → the supporter enters it and is linked
+// straight away → only the supporter can end it ("stop following"). See models/SupportLink.js.
 import { SupportLink } from '../models/SupportLink.js';
 import { User } from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
@@ -6,28 +7,41 @@ import { generateInviteCode } from '../utils/codes.js';
 import * as telegram from './telegram.service.js';
 
 const INVITE_TTL_MS = 24 * 60 * 60 * 1000; // invite codes work for 24 hours
-const ENDED = ['declined', 'revoked'];
+const ENDED = ['declined', 'revoked']; // 'declined' only exists on legacy links
 
 function inBackground(promise) {
   promise.catch((error) => console.error(`[background] ${error.message}`));
 }
 
 /** "Unseen messages about links the OTHER side ended", for the given side. */
-function noticeFilter(user) {
+function endedNoticeFilter(user) {
   return user.role === 'student'
     ? { studentId: user.id, endedBy: 'supporter', status: { $in: ENDED }, noticeSeen: false }
-    : { supporterId: user.id, endedBy: 'student', status: { $in: ENDED }, noticeSeen: false };
+    : { supporterId: user.id, endedBy: 'student', status: { $in: ENDED }, noticeSeen: false }; // legacy only
 }
 
-/** Notices in the shape the app shows: { linkId, kind, name, endedAt }. */
+/** "X is now your supporter" messages the student hasn't dismissed yet. */
+function joinedNoticeFilter(student) {
+  return { studentId: student.id, status: 'active', joinedNoticeSeen: false };
+}
+
+function noticeKind(link) {
+  if (link.status === 'active') return 'joined';
+  if (link.status === 'declined') return 'declined';
+  return link.activatedAt ? 'ended' : 'cancelled'; // 'cancelled' = a legacy request withdrawn before acceptance
+}
+
+/** Notices in the shape the app shows: { linkId, kind, name, at }. */
 export async function listNotices(user) {
-  const otherSide = user.role === 'student' ? 'supporterId' : 'studentId';
-  const links = await SupportLink.find(noticeFilter(user)).populate(otherSide, 'name').sort({ endedAt: -1 }).lean();
+  const isStudent = user.role === 'student';
+  const otherSide = isStudent ? 'supporterId' : 'studentId';
+  const filter = isStudent ? { $or: [endedNoticeFilter(user), joinedNoticeFilter(user)] } : endedNoticeFilter(user);
+  const links = await SupportLink.find(filter).populate(otherSide, 'name').sort({ updatedAt: -1 }).lean();
   return links.map((link) => ({
     linkId: link._id.toString(),
-    kind: link.status === 'declined' ? 'declined' : link.activatedAt ? 'ended' : 'cancelled',
+    kind: noticeKind(link),
     name: link[otherSide]?.name ?? 'Someone',
-    endedAt: link.endedAt,
+    at: link.endedAt ?? link.activatedAt,
   }));
 }
 
@@ -54,56 +68,36 @@ export async function createInvite(student) {
 
 /** Everything the student should see about sharing. */
 export async function listStudentLinks(student) {
-  const [open, invite, notices] = await Promise.all([
-    SupportLink.find({ studentId: student.id, status: { $in: ['pending', 'active'] } })
+  const [active, invite, notices] = await Promise.all([
+    SupportLink.find({ studentId: student.id, status: 'active' })
       .populate('supporterId', 'name email')
-      .sort({ updatedAt: -1 })
+      .sort({ activatedAt: -1 })
       .lean(),
     SupportLink.findOne({ studentId: student.id, status: 'invited', inviteExpiresAt: { $gt: new Date() } }).lean(),
     listNotices(student),
   ]);
 
-  const view = (link) => ({
-    linkId: link._id.toString(),
-    supporterName: link.supporterId.name,
-    supporterEmail: link.supporterId.email, // so the student knows EXACTLY who it is
-    telegramConnected: Boolean(link.telegramChatId), // transparency: does this person get Telegram messages?
-  });
-  const withSupporter = open.filter((link) => link.supporterId); // skip deleted accounts
-
   return {
-    supporters: withSupporter.filter((l) => l.status === 'active').map((l) => ({ ...view(l), linkedAt: l.activatedAt })),
-    requests: withSupporter.filter((l) => l.status === 'pending').map((l) => ({ ...view(l), requestedAt: l.requestedAt })),
+    supporters: active
+      .filter((link) => link.supporterId) // skip deleted accounts
+      .map((link) => ({
+        linkId: link._id.toString(),
+        supporterName: link.supporterId.name,
+        supporterEmail: link.supporterId.email, // so the student knows EXACTLY who it is
+        telegramConnected: Boolean(link.telegramChatId), // transparency: does this person get Telegram messages?
+        linkedAt: link.activatedAt,
+      })),
     pendingInvite: invite ? { linkId: invite._id.toString(), code: invite.inviteCode, expiresAt: invite.inviteExpiresAt } : null,
     notices,
   };
 }
 
-/** Student accepts a supporter's request → the link becomes active. */
-export async function acceptRequest(student, linkId) {
-  const link = await SupportLink.findOneAndUpdate(
-    { _id: linkId, studentId: student.id, status: 'pending' },
-    { $set: { status: 'active', activatedAt: new Date() } },
-    { returnDocument: 'after' },
-  );
-  if (!link) throw new AppError(404, 'Request not found. It may have been cancelled.');
-  inBackground(telegram.notifyLinkAccepted(link, student.name));
-  return { message: 'Supporter added' };
-}
-
-/** Student declines → the supporter sees "X declined your request". */
-export async function declineRequest(student, linkId) {
-  const link = await SupportLink.findOneAndUpdate(
-    { _id: linkId, studentId: student.id, status: 'pending' },
-    { $set: { status: 'declined', endedBy: 'student', endedAt: new Date(), noticeSeen: false } },
-  );
-  if (!link) throw new AppError(404, 'Request not found. It may have been cancelled.');
-  return { message: 'Request declined' };
-}
-
 // -------------------------------------------------------------- supporter side
 
-/** A supporter enters a student's code → a PENDING request the student must accept. */
+/**
+ * A supporter enters a student's code → linked straight away (ACTIVE). Creating and sharing the
+ * code is the student's consent, so there is no separate accept step.
+ */
 export async function redeemInvite(supporter, code) {
   const invalid = new AppError(400, 'This invite code is invalid or has expired. Ask the student for a new one.');
 
@@ -114,20 +108,14 @@ export async function redeemInvite(supporter, code) {
   const student = await User.findById(invite.studentId).lean();
   if (!student || student.role !== 'student') throw invalid;
 
-  const existing = await SupportLink.findOne({
-    studentId: invite.studentId,
-    supporterId: supporter.id,
-    status: { $in: ['pending', 'active'] },
-  }).lean();
-  if (existing) {
-    // Don't use up the code.
-    throw new AppError(409, existing.status === 'active' ? `You are already linked to ${student.name}` : `You already sent ${student.name} a request`);
-  }
+  const alreadyLinked = new AppError(409, `You are already following ${student.name}`);
+  const existing = await SupportLink.exists({ studentId: invite.studentId, supporterId: supporter.id, status: 'active' });
+  if (existing) throw alreadyLinked; // and don't use up the code
 
   // Connect once, reuse everywhere: if this supporter already connected Telegram on another link, reuse it.
   const withTelegram = await SupportLink.findOne({
     supporterId: supporter.id,
-    status: { $in: ['pending', 'active'] },
+    status: 'active',
     telegramChatId: { $ne: null },
   }).lean();
 
@@ -138,9 +126,10 @@ export async function redeemInvite(supporter, code) {
       { _id: invite._id, status: 'invited' },
       {
         $set: {
-          status: 'pending',
+          status: 'active',
           supporterId: supporter.id,
-          requestedAt: new Date(),
+          activatedAt: new Date(),
+          joinedNoticeSeen: false, // the student gets "X is now your supporter"
           ...(withTelegram && { telegramChatId: withTelegram.telegramChatId, telegramConnectedAt: new Date() }),
         },
         $unset: { inviteCode: 1, inviteExpiresAt: 1 },
@@ -148,11 +137,12 @@ export async function redeemInvite(supporter, code) {
       { returnDocument: 'after' },
     );
   } catch (error) {
-    if (error.code === 11000) throw new AppError(409, `You already sent ${student.name} a request`);
+    if (error.code === 11000) throw alreadyLinked; // the unique "one open link per pair" index
     throw error;
   }
   if (!link) throw invalid;
 
+  inBackground(telegram.notifyLinkStarted(link, student.name)); // only if their Telegram was reused
   return {
     linkId: link._id.toString(),
     status: link.status,
@@ -164,41 +154,37 @@ export async function redeemInvite(supporter, code) {
 // ----------------------------------------------------------------- both sides
 
 /**
- * Ends a link. Either side can: the student ("remove this supporter" / "cancel my code") or the
- * supporter ("stop following" / "cancel my request"). The other side gets an in-app message.
+ * DELETE /links/:id. Owner's rule: a student can only cancel an UNUSED invite code. Once a
+ * supporter is linked, only the supporter can end it ("stop following"); the student then sees a message.
  */
 export async function endLink(user, linkId) {
-  const isStudent = user.role === 'student';
-  const link = await SupportLink.findOne({
-    _id: linkId,
-    [isStudent ? 'studentId' : 'supporterId']: user.id, // you can only end YOUR links
-    status: { $in: isStudent ? ['invited', 'pending', 'active'] : ['pending', 'active'] },
-  });
-  if (!link) throw new AppError(404, 'Link not found');
-
-  if (link.status === 'invited') {
-    await link.deleteOne(); // an unused code: nobody else is involved
-    return { message: 'Invite cancelled' };
+  if (user.role === 'student') {
+    const deleted = await SupportLink.findOneAndDelete({ _id: linkId, studentId: user.id, status: 'invited' });
+    if (deleted) return { message: 'Invite cancelled' };
+    const isTheirSupporter = await SupportLink.exists({ _id: linkId, studentId: user.id, status: 'active' });
+    if (isTheirSupporter) throw new AppError(403, 'Supporters can only be removed by themselves (Stop following).');
+    throw new AppError(404, 'Link not found');
   }
 
-  const wasActive = link.status === 'active';
-  link.set({
-    status: 'revoked',
-    endedBy: user.role,
-    endedAt: new Date(),
-    noticeSeen: false,
-    telegramConnectCode: undefined,
-    telegramConnectExpiresAt: undefined,
-  });
-  await link.save();
-
-  if (isStudent && wasActive) inBackground(telegram.notifyLinkEndedByStudent(link, user.name));
-  return { message: 'Link removed' };
+  const link = await SupportLink.findOneAndUpdate(
+    { _id: linkId, supporterId: user.id, status: { $in: ['pending', 'active'] } }, // 'pending' = legacy
+    {
+      $set: { status: 'revoked', endedBy: 'supporter', endedAt: new Date(), noticeSeen: false },
+      $unset: { telegramConnectCode: 1, telegramConnectExpiresAt: 1 },
+    },
+  );
+  if (!link) throw new AppError(404, 'Link not found');
+  return { message: 'Stopped following' };
 }
 
-/** Hides the "X ended the link" message for the user who received it. */
+/** Hides a link message ("X is now your supporter" / "X stopped following") for the user who got it. */
 export async function dismissNotice(user, linkId) {
-  const result = await SupportLink.updateOne({ _id: linkId, ...noticeFilter(user) }, { $set: { noticeSeen: true } });
-  if (result.matchedCount === 0) throw new AppError(404, 'Notice not found');
-  return { message: 'Dismissed' };
+  const ended = await SupportLink.updateOne({ _id: linkId, ...endedNoticeFilter(user) }, { $set: { noticeSeen: true } });
+  if (ended.matchedCount > 0) return { message: 'Dismissed' };
+
+  if (user.role === 'student') {
+    const joined = await SupportLink.updateOne({ _id: linkId, ...joinedNoticeFilter(user) }, { $set: { joinedNoticeSeen: true } });
+    if (joined.matchedCount > 0) return { message: 'Dismissed' };
+  }
+  throw new AppError(404, 'Notice not found');
 }

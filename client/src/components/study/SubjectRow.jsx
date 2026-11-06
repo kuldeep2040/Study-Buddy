@@ -46,9 +46,9 @@ export default function SubjectRow({ subject, onRename, onDelete, canDelete }) {
             onChange={(e) => setName(e.target.value)}
             maxLength={30}
             autoFocus
-            className="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-300 px-3 text-base focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="min-h-11 min-w-0 flex-1 rounded-lg border border-line px-3 text-base focus:border-accent focus:outline-none focus:ring-2 focus:ring-brand-line"
           />
-          <button type="submit" disabled={saving} className={`${smallButton} bg-indigo-600 text-white`}>
+          <button type="submit" disabled={saving} className={`${smallButton} bg-brand text-white`}>
             Save
           </button>
           <button
@@ -58,15 +58,15 @@ export default function SubjectRow({ subject, onRename, onDelete, canDelete }) {
               setName(subject.name);
               setError('');
             }}
-            className={`${smallButton} text-slate-600 hover:bg-slate-100`}
+            className={`${smallButton} text-muted hover:bg-surface-2`}
           >
             Cancel
           </button>
         </form>
       ) : (
         <div className="flex items-center gap-2">
-          <span className="min-w-0 flex-1 truncate font-medium text-slate-800">{subject.name}</span>
-          <button type="button" onClick={() => setEditing(true)} className={`${smallButton} text-indigo-600 hover:bg-indigo-50`}>
+          <span className="min-w-0 flex-1 truncate font-medium text-ink">{subject.name}</span>
+          <button type="button" onClick={() => setEditing(true)} className={`${smallButton} text-accent hover:bg-brand-soft`}>
             Rename
           </button>
           <button
@@ -74,13 +74,13 @@ export default function SubjectRow({ subject, onRename, onDelete, canDelete }) {
             onClick={remove}
             disabled={!canDelete}
             title={canDelete ? undefined : 'Keep at least one subject'}
-            className={`${smallButton} text-rose-600 hover:bg-rose-50`}
+            className={`${smallButton} text-danger hover:bg-danger-soft`}
           >
             Delete
           </button>
         </div>
       )}
-      {error && <p className="mt-1 text-sm text-rose-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-danger">{error}</p>}
     </li>
   );
 }

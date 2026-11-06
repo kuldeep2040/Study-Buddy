@@ -5,11 +5,20 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="theme-color" content="#f5f3ee" />
+    <script>
+      // Pick light/dark BEFORE the page draws (no flash). Same logic as src/utils/theme.js.
+      (function () {
+        var pref = 'auto';
+        try { pref = localStorage.getItem('studybuddy:theme') || 'auto'; } catch (e) {}
+        var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
     <meta name="description" content="Track your study time, stay focused, and keep improving." />
     <title>Study Buddy</title>
   </head>
-  <body class="bg-slate-50 text-slate-900 antialiased">
+  <body class="bg-page font-sans text-ink antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
