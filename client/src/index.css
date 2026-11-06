@@ -1,0 +1,2 @@
+/* The ONLY CSS file. Tailwind generates all the utility classes we use in JSX. */
+@import "tailwindcss";

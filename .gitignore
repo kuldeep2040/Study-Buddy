@@ -1,0 +1,26 @@
+# Dependencies (re-created by `npm install`, never committed)
+node_modules/
+
+# Environment files: these hold SECRETS. Only the .env.example files are committed.
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+dev-dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor clutter
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Deployment tool folders
+.vercel
+CLAUDE.md

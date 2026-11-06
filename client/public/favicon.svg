@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Study Buddy icon: open book on an indigo square. Full-bleed square so it also works as a "maskable" app icon. -->
+  <rect width="512" height="512" fill="#4f46e5"/>
+  <path d="M256 168c-34-26-82-36-128-32v196c46-4 94 6 128 32 34-26 82-36 128-32V136c-46-4-94 6-128 32z" fill="#ffffff"/>
+  <path d="M256 168v196" stroke="#4f46e5" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="384" cy="352" r="40" fill="#facc15"/>
+  <path d="M384 330v24l14 10" stroke="#4f46e5" stroke-width="10" stroke-linecap="round" fill="none"/>
+</svg>
