@@ -15,13 +15,25 @@ export async function getTodaySessions({ signal } = {}) {
   return data;
 }
 
-/** → { session, serverTime } */
-export async function startSession(subject) {
-  const { data } = await api.post('/sessions/start', { subject });
+/** mode: 'normal' | 'pomodoro'. → { session, serverTime } */
+export async function startSession(subject, mode = 'normal') {
+  const { data } = await api.post('/sessions/start', { subject, mode });
   return data;
 }
 
-/** → { session, todayTotalMinutes, serverTime } */
+/** Pause focus time (the session stays open). → { session, serverTime } */
+export async function pauseSession() {
+  const { data } = await api.post('/sessions/pause');
+  return data;
+}
+
+/** End a pause, or a Pomodoro break ("Start next round"). → { session, serverTime } */
+export async function resumeSession() {
+  const { data } = await api.post('/sessions/resume');
+  return data;
+}
+
+/** → { session, todayTotalMinutes, dailyGoalMinutes, serverTime } */
 export async function stopSession() {
   const { data } = await api.post('/sessions/stop');
   return data;

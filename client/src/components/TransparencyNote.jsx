@@ -6,15 +6,15 @@ import Icon from './ui/Icon.jsx';
 export default function TransparencyNote({ supporters }) {
   let message;
   if (!supporters) {
-    message = 'Your supporters get a Telegram message when you start and stop studying.';
+    message = 'Your supporters get a Telegram message when you start, pause and stop studying.';
   } else if (supporters.length === 0) {
     message = 'Nothing is shared right now: no supporters are linked. Your sessions are still saved for you.';
   } else {
     const names = supporters.map((s) => s.supporterName).join(', ');
     message = (
       <>
-        Shared with <strong className="text-ink-soft">{names}</strong>: a Telegram message when you start and stop
-        studying (if they connected Telegram), and your progress, read-only.{' '}
+        Shared with <strong className="text-ink-soft">{names}</strong>: a Telegram message when you start, pause, resume
+        or stop studying and at each Pomodoro break (if they connected Telegram), and your progress, read-only.{' '}
         <Link to="/settings" className="font-semibold text-accent underline">
           What they see
         </Link>

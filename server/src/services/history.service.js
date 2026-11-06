@@ -3,12 +3,14 @@
 import { Session } from '../models/Session.js';
 import { env } from '../config/env.js';
 import { addDays, istDayStart, toIstDateString } from '../utils/time.js';
+import { sessionClock } from '../utils/sessionClock.js';
 
 const MAX_SESSION_MINUTES = env.AUTO_STOP_HOURS * 60;
 
 /** Only the fields history needs — never the raw document. */
 function toSessionView(session, now) {
-  const runningMinutes = Math.min((now - session.startTime) / 60000, MAX_SESSION_MINUTES);
+  // A running session counts its study time so far (pauses and breaks excluded), capped at the limit.
+  const runningMinutes = Math.min(sessionClock(session, now.getTime()).studiedMs / 60000, MAX_SESSION_MINUTES);
   return {
     id: session._id.toString(),
     subject: session.subject,
@@ -16,6 +18,7 @@ function toSessionView(session, now) {
     endTime: session.endTime,
     durationMinutes: session.status === 'active' ? runningMinutes : session.durationMinutes || 0,
     status: session.status,
+    mode: session.mode ?? 'normal',
   };
 }
 

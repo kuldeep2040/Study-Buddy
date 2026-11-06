@@ -1,7 +1,8 @@
 // The study area on the home screen. Three states:
-//   running → big live timer circle + Stop (see RunningSession)
+//   running → live timer ring + Pause/Resume/End + full screen (see RunningSession)
 //   locked  → he turned on "require a supporter" and none is linked yet (no Start button)
 //   idle    → subject chips + big round "Start Studying" button + Normal/Pomodoro switch
+//             (the chosen mode is remembered on this device)
 // After Stop, a summary card shows the session, today's total and % of the daily goal.
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -13,31 +14,36 @@ import SegmentedControl from '../ui/SegmentedControl.jsx';
 import SubjectPicker from './SubjectPicker.jsx';
 import RunningSession from './RunningSession.jsx';
 import SessionSummaryCard from './SessionSummaryCard.jsx';
+import { askNotificationPermission, unlockSound } from '../../utils/alerts.js';
 
 const LAST_SUBJECT_KEY = 'studybuddy:lastSubject';
+const LAST_MODE_KEY = 'studybuddy:lastMode';
 const MODES = [
   { value: 'normal', label: 'Normal timer' },
-  { value: 'pomodoro', label: 'Pomodoro', soon: true }, // Phase 2
+  { value: 'pomodoro', label: 'Pomodoro' },
 ];
 
 // localStorage can throw (private mode, blocked storage) — it's only a convenience, so ignore errors.
-function readLastSubject() {
+function readSaved(key) {
   try {
-    return localStorage.getItem(LAST_SUBJECT_KEY) || '';
+    return localStorage.getItem(key) || '';
   } catch {
     return '';
   }
 }
-function saveLastSubject(name) {
+function save(key, value) {
   try {
-    localStorage.setItem(LAST_SUBJECT_KEY, name);
+    localStorage.setItem(key, value);
   } catch {
     /* ignore */
   }
 }
 
-export default function StudyPanel({ study, subjects, locked, onEditSubjects }) {
-  const [chosen, setChosen] = useState(readLastSubject);
+/** `settings` = the student's settings (Pomodoro lengths + sound), or null while loading. */
+export default function StudyPanel({ study, subjects, settings, locked, onEditSubjects }) {
+  const [chosen, setChosen] = useState(() => readSaved(LAST_SUBJECT_KEY));
+  const [mode, setMode] = useState(() => (readSaved(LAST_MODE_KEY) === 'pomodoro' ? 'pomodoro' : 'normal'));
+  const pomodoro = settings?.pomodoro;
   const [error, setError] = useState('');
   const [summary, setSummary] = useState(null); // result of the last Stop
 
@@ -47,13 +53,27 @@ export default function StudyPanel({ study, subjects, locked, onEditSubjects }) 
   async function handleStart() {
     setError('');
     setSummary(null);
+    // Taps are the only moment browsers allow us to enable sound / ask about notifications.
+    unlockSound();
+    if (mode === 'pomodoro') askNotificationPermission();
     try {
-      await study.start(selectedSubject);
-      saveLastSubject(selectedSubject);
+      await study.start(selectedSubject, mode);
+      save(LAST_SUBJECT_KEY, selectedSubject);
+      save(LAST_MODE_KEY, mode);
     } catch (err) {
       setError(getErrorMessage(err));
     }
   }
+
+  // Pause / Resume / "Start next round": errors (e.g. auto-stopped meanwhile) show above the timer.
+  const run = (action) => async () => {
+    setError('');
+    try {
+      await action();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
 
   async function handleStop() {
     setError('');
@@ -70,9 +90,12 @@ export default function StudyPanel({ study, subjects, locked, onEditSubjects }) 
       <RunningSession
         session={study.activeSession}
         clockOffsetMs={study.clockOffsetMs}
+        busy={study.busy}
+        soundEnabled={settings?.soundEnabled ?? true}
+        onPause={run(study.pause)}
+        onResume={run(study.resume)}
         onStop={handleStop}
-        stopping={study.busy}
-        onLimitReached={study.refresh}
+        onServerCheck={study.refresh}
       />
     );
   } else if (locked) {
@@ -119,7 +142,17 @@ export default function StudyPanel({ study, subjects, locked, onEditSubjects }) 
           </div>
         </div>
 
-        <SegmentedControl label="Timer mode" options={MODES} value="normal" size="sm" className="mx-auto max-w-xs" />
+        <div className="space-y-1.5">
+          <SegmentedControl label="Timer mode" options={MODES} value={mode} onChange={setMode} size="sm" className="mx-auto max-w-xs" />
+          {mode === 'pomodoro' && pomodoro && (
+            <p className="text-center text-xs text-muted">
+              {pomodoro.focusMinutes} min focus · {pomodoro.shortBreakMinutes} min break · long break every {pomodoro.roundsBeforeLongBreak} rounds ·{' '}
+              <Link to="/settings" className="font-semibold text-accent">
+                change
+              </Link>
+            </p>
+          )}
+        </div>
       </div>
     );
   }

@@ -2,12 +2,12 @@
 // Tapping it opens the read-only detail view.
 import { Link } from 'react-router-dom';
 import { useLiveStudentStats } from '../../hooks/useLiveStudentStats.js';
-import { formatClock, formatDuration } from '../../utils/format.js';
+import { formatDuration } from '../../utils/format.js';
+import LiveStatusText from './LiveStatusText.jsx';
 import Icon from '../ui/Icon.jsx';
 
 export default function StudentCard({ student, serverTime, receivedAt }) {
-  const { elapsedMs, totalMinutes } = useLiveStudentStats(student, serverTime, receivedAt);
-  const active = student.activeSession;
+  const { view, totalMinutes } = useLiveStudentStats(student, serverTime, receivedAt);
   const goal = student.dailyGoalMinutes;
   const progress = goal ? Math.min(totalMinutes / goal, 1) : 0;
 
@@ -22,14 +22,7 @@ export default function StudentCard({ student, serverTime, receivedAt }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-bold text-ink">{student.name}</p>
-          {active ? (
-            <p className="flex items-center gap-1.5 text-sm font-semibold text-success">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-success" aria-hidden="true" />
-              Studying {active.subject} · <span className="tabular-nums">{formatClock(elapsedMs)}</span>
-            </p>
-          ) : (
-            <p className="text-sm text-muted">Not studying right now</p>
-          )}
+          <LiveStatusText subject={student.activeSession?.subject} view={view} />
         </div>
         <Icon name="chevron" className="h-5 w-5 text-faint" />
       </div>

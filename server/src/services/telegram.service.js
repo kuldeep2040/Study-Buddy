@@ -61,10 +61,30 @@ async function notifySupporters(studentId, text) {
 // --- Message templates (wording from the product spec) ---
 
 export function notifySessionStarted(student, session) {
+  const pomodoro = session.mode === 'pomodoro' ? ` (Pomodoro, ${session.pomodoro.focusMinutes}-min focus rounds)` : '';
   return notifySupporters(
     student.id,
-    `📚 ${student.name} started studying ${session.subject} at ${formatIstTime(session.startTime)} IST`,
+    `📚 ${student.name} started studying ${session.subject} at ${formatIstTime(session.startTime)} IST${pomodoro}`,
   );
+}
+
+export function notifySessionPaused(student, session, studiedMinutes) {
+  return notifySupporters(student.id, `⏸️ ${student.name} paused ${session.subject} after ${formatDuration(studiedMinutes)} of study`);
+}
+
+export function notifySessionResumed(student, session) {
+  return notifySupporters(student.id, `▶️ ${student.name} is back to ${session.subject}`);
+}
+
+export function notifyBreakStarted(student, session, round, breakMinutes) {
+  return notifySupporters(
+    student.id,
+    `☕ ${student.name} finished focus round ${round} of ${session.subject} and is taking a ${Math.round(breakMinutes)}-min break`,
+  );
+}
+
+export function notifyBreakEnded(student, session, round) {
+  return notifySupporters(student.id, `🎯 ${student.name} started focus round ${round} of ${session.subject}`);
 }
 
 export function notifySessionStopped(student, session, todayTotalMinutes) {
@@ -80,8 +100,12 @@ export function notifyLinkStarted(link, studentName) {
 }
 
 export function notifySessionAutoStopped(student, session) {
+  const why =
+    session.autoStopReason === 'long-pause'
+      ? 'ended automatically after a pause of over an hour'
+      : `was auto-stopped after ${env.AUTO_STOP_HOURS} hours of study`;
   return notifySupporters(
     student.id,
-    `⏹️ ${student.name}'s session was auto-stopped after ${env.AUTO_STOP_HOURS} hours (${session.subject})`,
+    `⏹️ ${student.name}'s ${session.subject} session ${why}. Studied ${formatDuration(session.durationMinutes)}.`,
   );
 }

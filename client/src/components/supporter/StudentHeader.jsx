@@ -1,10 +1,9 @@
-// "R  Rahul's progress / You're their supporter" + a live "Studying Physics · 0:25:09" pill.
+// "R  Rahul's progress / You're their supporter" + a live status pill (studying / paused / on a break).
 import { useLiveStudentStats } from '../../hooks/useLiveStudentStats.js';
-import { formatClock } from '../../utils/format.js';
+import LiveStatusText from './LiveStatusText.jsx';
 
 export default function StudentHeader({ student, serverTime, receivedAt }) {
-  const { elapsedMs } = useLiveStudentStats(student, serverTime, receivedAt);
-  const active = student.activeSession;
+  const { view } = useLiveStudentStats(student, serverTime, receivedAt);
 
   return (
     <div className="space-y-2">
@@ -17,17 +16,7 @@ export default function StudentHeader({ student, serverTime, receivedAt }) {
           <p className="text-sm text-muted">You&apos;re their supporter · read-only</p>
         </div>
       </div>
-      {active ? (
-        <p className="inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1.5 text-sm font-semibold text-success" data-testid="status-pill">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-success" aria-hidden="true" />
-          Studying {active.subject} · <span className="tabular-nums" role="timer">{formatClock(elapsedMs)}</span>
-        </p>
-      ) : (
-        <p className="inline-flex items-center gap-2 rounded-full bg-surface-2 px-3 py-1.5 text-sm font-semibold text-ink-soft" data-testid="status-pill">
-          <span className="h-2 w-2 rounded-full bg-faint" aria-hidden="true" />
-          Not studying right now
-        </p>
-      )}
+      <LiveStatusText subject={student.activeSession?.subject} view={view} pill />
     </div>
   );
 }

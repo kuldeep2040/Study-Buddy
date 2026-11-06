@@ -3,10 +3,11 @@
 
 const CAN = [
   'When you are studying: the subject and how long it has been running',
+  'When you pause or resume, and your Pomodoro rounds and breaks',
   "Today's total study time, your daily goal and how close you are to it",
   'This week: hours per day and per subject',
   'Your full study history (days, totals, subjects and sessions), including days before they linked',
-  'A Telegram message when you start and stop studying, if they connected Telegram',
+  'A Telegram message when you start, pause, resume or stop studying, and at each Pomodoro break, if they connected Telegram',
 ];
 
 const CANNOT = [

@@ -2,12 +2,24 @@
 import { formatDuration, formatTime } from '../../utils/format.js';
 import { sessionMinutes } from '../../hooks/useTodayTotal.js';
 import { subjectColor } from '../../utils/subjectColors.js';
+import { sessionClock } from '../../utils/sessionClock.js';
 import Card from '../ui/Card.jsx';
 
-const STATUS_BADGE = {
-  active: { label: 'In progress', className: 'bg-success-soft text-success' },
+const BADGES = {
+  running: { label: 'In progress', className: 'bg-success-soft text-success' },
+  paused: { label: 'Paused', className: 'bg-surface-2 text-muted' },
+  break: { label: 'On a break', className: 'bg-highlight-soft text-highlight' },
   'auto-stopped': { label: 'Auto-stopped', className: 'bg-warn-soft text-warn-ink' },
 };
+
+/** Which badge (if any) a session gets right now. */
+function badgeFor(session, now) {
+  if (session.status === 'auto-stopped') return BADGES['auto-stopped'];
+  if (session.status !== 'active') return null;
+  const { openPause, pendingBreakAtMs } = sessionClock(session, now);
+  if (openPause?.reason === 'break' || pendingBreakAtMs) return BADGES.break;
+  return openPause ? BADGES.paused : BADGES.running;
+}
 
 export default function TodayCard({ sessions, now }) {
   return (
@@ -27,7 +39,7 @@ export default function TodayCard({ sessions, now }) {
         <Card pad="px-4 py-1">
           <ul className="divide-y divide-line">
             {sessions.map((session) => {
-              const badge = STATUS_BADGE[session.status];
+              const badge = badgeFor(session, now);
               return (
                 <li key={session.id} className="flex items-center gap-3 py-2.5">
                   <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: subjectColor(session.subject) }} aria-hidden="true" />
@@ -36,6 +48,7 @@ export default function TodayCard({ sessions, now }) {
                     <p className="text-sm text-muted">
                       {formatTime(session.startTime)}
                       {session.endTime ? ` – ${formatTime(session.endTime)}` : ''}
+                      {session.mode === 'pomodoro' && ' · 🍅 Pomodoro'}
                     </p>
                   </div>
                   {badge && <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge.className}`}>{badge.label}</span>}

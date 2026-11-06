@@ -11,6 +11,8 @@ export const sessionRouter = Router();
 sessionRouter.use(requireAuth, requireRole('student'));
 
 sessionRouter.post('/start', validate({ body: startSessionSchema }), sessionController.start);
+sessionRouter.post('/pause', sessionController.pause); // pause focus time (session stays open)
+sessionRouter.post('/resume', sessionController.resume); // after a pause, or start the next Pomodoro round
 sessionRouter.post('/stop', sessionController.stop);
 sessionRouter.get('/active', sessionController.active);
 sessionRouter.get('/today', sessionController.today);

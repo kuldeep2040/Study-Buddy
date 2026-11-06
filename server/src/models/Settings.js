@@ -1,5 +1,5 @@
 // Per-student preferences. Exactly one document per student (created at signup).
-// Phase 1 only stores subjects; Phase 2 adds daily goal + Pomodoro durations.
+// Subjects, exam, daily goal, the "require a supporter" rule, Pomodoro lengths and sound.
 import mongoose from 'mongoose';
 
 export const DEFAULT_SUBJECTS = ['Physics', 'Chemistry', 'Maths'];
@@ -8,6 +8,17 @@ export const DEFAULT_SUBJECTS = ['Physics', 'Chemistry', 'Maths'];
 const subjectSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true, minlength: 1, maxlength: 30 },
 });
+
+// Pomodoro lengths (minutes). Copied onto each Pomodoro session when it starts.
+const pomodoroSettingsSchema = new mongoose.Schema(
+  {
+    focusMinutes: { type: Number, min: 5, max: 90, default: 25 },
+    shortBreakMinutes: { type: Number, min: 1, max: 30, default: 5 },
+    longBreakMinutes: { type: Number, min: 5, max: 60, default: 15 },
+    roundsBeforeLongBreak: { type: Number, min: 2, max: 8, default: 4 },
+  },
+  { _id: false },
+);
 
 const settingsSchema = new mongoose.Schema(
   {
@@ -23,6 +34,9 @@ const settingsSchema = new mongoose.Schema(
     dailyGoalMinutes: { type: Number, min: 15, max: 960, default: 240 },
     // When true, he can't start a session until at least one supporter link is active.
     requireSupporterBeforeStudy: { type: Boolean, default: false },
+    // default: () => ({}) creates the sub-document, so the four defaults above are filled in.
+    pomodoro: { type: pomodoroSettingsSchema, default: () => ({}) },
+    soundEnabled: { type: Boolean, default: true }, // beep at each Pomodoro change (on this account)
   },
   { timestamps: true },
 );

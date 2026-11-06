@@ -22,6 +22,7 @@ import ExamGoalSettings from '../components/settings/ExamGoalSettings.jsx';
 import StudyRulesSettings from '../components/settings/StudyRulesSettings.jsx';
 import SharingInfo from '../components/settings/SharingInfo.jsx';
 import AppearanceSettings from '../components/settings/AppearanceSettings.jsx';
+import FocusTimerSettings from '../components/settings/FocusTimerSettings.jsx';
 import SubjectEditor from '../components/study/SubjectEditor.jsx';
 
 const THEME_LABEL = { auto: 'Auto (follows your device)', light: 'Light', dark: 'Dark' };
@@ -108,6 +109,13 @@ export default function SettingsPage() {
 
       <CollapsibleCard title="Exam & daily goal" summary={examSummary(settings.data)}>
         <ExamGoalSettings settings={settings.data} onSaved={settings.setData} />
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        title="Focus timer (Pomodoro)"
+        summary={`${settings.data.pomodoro.focusMinutes} / ${settings.data.pomodoro.shortBreakMinutes} / ${settings.data.pomodoro.longBreakMinutes} min · long break every ${settings.data.pomodoro.roundsBeforeLongBreak} rounds · sound ${settings.data.soundEnabled ? 'on' : 'off'}`}
+      >
+        <FocusTimerSettings settings={settings.data} onSaved={settings.setData} />
       </CollapsibleCard>
 
       <CollapsibleCard title="Study rules" summary={`Require a supporter before studying: ${settings.data.requireSupporterBeforeStudy ? 'on' : 'off'}`}>

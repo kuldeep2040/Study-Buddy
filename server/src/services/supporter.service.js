@@ -60,7 +60,11 @@ async function buildStudentOverview(student) {
     date: today.date,
     todayTotalMinutes: today.totalMinutes,
     dailyGoalMinutes: settings.dailyGoalMinutes, // shared since the redesign (owner OK'd, 2026-11-06)
-    activeSession: running ? { subject: running.subject, startTime: running.startTime } : null,
+    // Timing data only (start, pauses, Pomodoro lengths), so the supporter's screen can show the
+    // same live timer / "Paused" / "On a break" as the student's — via utils/sessionClock.js.
+    activeSession: running
+      ? { subject: running.subject, startTime: running.startTime, mode: running.mode, pomodoro: running.pomodoro, pauses: running.pauses }
+      : null,
     lastSession: lastFinished
       ? {
           subject: lastFinished.subject,

@@ -81,7 +81,7 @@ export default function HomePage() {
       ) : (
         <>
           <GoalCard totalMinutes={today.totalMinutes} goalMinutes={settings.data.dailyGoalMinutes} />
-          <StudyPanel study={study} subjects={subjectsState.subjects} locked={locked} onEditSubjects={() => setEditingSubjects(true)} />
+          <StudyPanel study={study} subjects={subjectsState.subjects} settings={settings.data} locked={locked} onEditSubjects={() => setEditingSubjects(true)} />
           {editingSubjects && !study.activeSession && (
             <SubjectEditor subjectsState={subjectsState} onClose={() => setEditingSubjects(false)} />
           )}

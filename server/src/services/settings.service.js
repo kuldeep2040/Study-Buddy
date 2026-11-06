@@ -25,6 +25,13 @@ function toSettingsView(settings) {
     examDaysLeft: settings.examDate ? daysBetween(today, settings.examDate) : null,
     dailyGoalMinutes: settings.dailyGoalMinutes,
     requireSupporterBeforeStudy: settings.requireSupporterBeforeStudy,
+    pomodoro: {
+      focusMinutes: settings.pomodoro.focusMinutes,
+      shortBreakMinutes: settings.pomodoro.shortBreakMinutes,
+      longBreakMinutes: settings.pomodoro.longBreakMinutes,
+      roundsBeforeLongBreak: settings.pomodoro.roundsBeforeLongBreak,
+    },
+    soundEnabled: settings.soundEnabled,
   };
 }
 

@@ -61,10 +61,10 @@ export function useStudySession() {
   }, [refresh]);
 
   const start = useCallback(
-    async (subject) => {
+    async (subject, mode = 'normal') => {
       setBusy(true);
       try {
-        const { session, serverTime } = await sessionsApi.startSession(subject);
+        const { session, serverTime } = await sessionsApi.startSession(subject, mode);
         syncClock(serverTime);
         setActiveSession(session);
         setTodaySessions((list) => [session, ...list]);
@@ -78,6 +78,28 @@ export function useStudySession() {
     },
     [refresh],
   );
+
+  // Pause / Resume (and "Start next round" after a Pomodoro break) both return the updated session.
+  const changeSession = useCallback(
+    async (apiCall) => {
+      setBusy(true);
+      try {
+        const { session, serverTime } = await apiCall();
+        syncClock(serverTime);
+        setActiveSession(session);
+        setTodaySessions((list) => list.map((s) => (s.id === session.id ? session : s)));
+        return session;
+      } catch (err) {
+        refresh(); // e.g. 409: already paused / auto-stopped meanwhile → show the real state
+        throw err;
+      } finally {
+        setBusy(false);
+      }
+    },
+    [refresh],
+  );
+  const pause = useCallback(() => changeSession(sessionsApi.pauseSession), [changeSession]);
+  const resume = useCallback(() => changeSession(sessionsApi.resumeSession), [changeSession]);
 
   const stop = useCallback(async () => {
     setBusy(true);
@@ -95,5 +117,5 @@ export function useStudySession() {
     }
   }, [refresh]);
 
-  return { status, error, activeSession, todaySessions, busy, clockOffsetMs, start, stop, refresh, retry };
+  return { status, error, activeSession, todaySessions, busy, clockOffsetMs, start, pause, resume, stop, refresh, retry };
 }
